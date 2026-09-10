@@ -1,0 +1,6 @@
+{
+  "code": "discovery_incomplete",
+  "stepId": "step_3",
+  "expected": "Verified success and captured outputs within the model-call budget",
+  "accessibilitySnapshot": "main:\n- banner:\n  - strong: Cedar Community Bank\n  - paragraph: Member services · Training environment\n- iframe\n- contentinfo: Synthetic data only. This portal does not connect to a real financial institution.\n/workspace:\n- main:\n  - heading \"Member details\" [level=1]\n  - table:\n    - rowgroup:\n      - row \"Member ID [REDACTED]\":\n        - rowheader \"Member ID\"\n        - cell \"[REDACTED]\"\n      - row \"Name [REDACTED]\":\n        - rowheader \"Name\"\n        - cell \"[REDACTED]\"\n  - heading \"Accounts\" [level=2]\n  - table:\n    - rowgroup:\n      - row \"Account Status\":\n        - columnheader \"Account\"\n        - columnheader \"Status\"\n    - rowgroup:\n      - row \"Savings account Active\":\n        - cell \"Savings account\":\n          - link \"Savings account\":\n            - /url: /balance?scenario=&member_id=[REDACTED]\n        - cell \"Active\""
+}

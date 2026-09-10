@@ -1,0 +1,8 @@
+{
+  "artifactSha256": "3445c275e7b0785c9a14342e126fc34b76a0eed9b969687c1784216028b393fb",
+  "scenario": "normal",
+  "status": "success",
+  "outputsVerified": true,
+  "modelCallsDuringReplay": 0,
+  "operator": "none"
+}

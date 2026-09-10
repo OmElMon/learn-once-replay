@@ -1,0 +1,9 @@
+{
+  "artifactSha256": "3445c275e7b0785c9a14342e126fc34b76a0eed9b969687c1784216028b393fb",
+  "scenario": "denied",
+  "status": "failed",
+  "code": "permission_denied",
+  "outputsVerified": false,
+  "modelCallsDuringReplay": 0,
+  "operator": "none"
+}

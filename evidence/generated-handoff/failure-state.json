@@ -1,0 +1,6 @@
+{
+  "code": "operator_verification",
+  "stepId": "step_3",
+  "expected": "operator intervention",
+  "accessibilitySnapshot": "main:\n- banner:\n  - strong: Cedar Community Bank\n  - paragraph: Member services · Training environment\n- iframe\n- contentinfo: Synthetic data only. This portal does not connect to a real financial institution.\n/workspace:\n- main:\n  - heading \"Operator verification required\" [level=1]\n  - paragraph: Automation must pause. A human operator must verify this training session before member records can be viewed.\n  - button \"Verify session\""
+}

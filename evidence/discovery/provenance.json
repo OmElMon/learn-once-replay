@@ -1,0 +1,11 @@
+{
+  "provider": "ollama",
+  "endpoint": "http://127.0.0.1:11434/api/chat",
+  "model": "qwen2.5:3b",
+  "digest": "357c53fb659c5076de1d65ccb0b397446227b71a42be9d1603d46168015c9e4b",
+  "local": true,
+  "paidApiCalls": 0,
+  "discovery": "genuine LLM-driven browser interaction",
+  "inputTokens": 5641,
+  "outputTokens": 366
+}

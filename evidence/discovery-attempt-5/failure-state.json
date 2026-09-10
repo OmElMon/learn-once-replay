@@ -1,0 +1,6 @@
+{
+  "code": "discovery_incomplete",
+  "stepId": "step_1",
+  "expected": "Verified success and captured outputs within the model-call budget",
+  "accessibilitySnapshot": "main:\n- banner:\n  - strong: Cedar Community Bank\n  - paragraph: Member services · Training environment\n- iframe\n- contentinfo: Synthetic data only. This portal does not connect to a real financial institution.\n/workspace:\n- main:\n  - heading \"Member lookup\" [level=1]\n  - paragraph: Find a member by their five-digit member ID.\n  - text: Member ID\n  - textbox \"Member ID\"\n  - button \"Search\""
+}

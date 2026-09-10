@@ -1,0 +1,7 @@
+{"timestamp":"2026-09-10T18:54:14.377Z","sessionId":"d5d8d48c-7135-47d4-b80a-c952f053937c","owner":"automation","type":"session_opened","mode":"browser","route":"/"}
+{"timestamp":"2026-09-10T18:54:14.378Z","sessionId":"d5d8d48c-7135-47d4-b80a-c952f053937c","owner":"automation","type":"provenance","artifact":"evidence/discovery/capability.json","sha256":"3445c275e7b0785c9a14342e126fc34b76a0eed9b969687c1784216028b393fb","discovery":"genuine local LLM","operator":"none"}
+{"timestamp":"2026-09-10T18:54:14.398Z","sessionId":"d5d8d48c-7135-47d4-b80a-c952f053937c","owner":"automation","type":"action_started","stepId":"step_1","action":"fill","target":{"kind":"role","value":"textbox","name":"Member ID","frame":"/workspace"}}
+{"timestamp":"2026-09-10T18:54:14.409Z","sessionId":"d5d8d48c-7135-47d4-b80a-c952f053937c","owner":"automation","type":"action_completed","stepId":"step_1","action":"fill","outputPresent":false}
+{"timestamp":"2026-09-10T18:54:14.414Z","sessionId":"d5d8d48c-7135-47d4-b80a-c952f053937c","owner":"automation","type":"action_started","stepId":"step_2","action":"click","target":{"kind":"role","value":"button","name":"Search","frame":"/workspace"}}
+{"timestamp":"2026-09-10T18:54:14.465Z","sessionId":"d5d8d48c-7135-47d4-b80a-c952f053937c","owner":"automation","type":"action_completed","stepId":"step_2","action":"click","outputPresent":false}
+{"timestamp":"2026-09-10T18:54:14.471Z","sessionId":"d5d8d48c-7135-47d4-b80a-c952f053937c","owner":"automation","type":"result","status":"business_outcome","code":"member_not_found","outputs":{}}

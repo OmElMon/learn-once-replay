@@ -1,0 +1,209 @@
+{
+  "schemaVersion": 1,
+  "name": "get_savings_balance",
+  "description": "Find a member and read the savings account balance.",
+  "inputs": {
+    "member_id": {
+      "type": "string",
+      "description": "Synthetic member identifier"
+    }
+  },
+  "outputs": {
+    "savings_balance": {
+      "type": "string",
+      "description": "Displayed savings balance"
+    }
+  },
+  "steps": [
+    {
+      "id": "enter_member",
+      "action": "fill",
+      "target": {
+        "kind": "label",
+        "value": "Member ID",
+        "frame": "/workspace"
+      },
+      "value": "{{member_id}}",
+      "recoveries": [
+        {
+          "code": "temporary_interruption",
+          "target": {
+            "kind": "role",
+            "value": "heading",
+            "name": "Temporary service interruption",
+            "frame": "/workspace"
+          },
+          "text": "Temporary service interruption",
+          "action": "click",
+          "actionTarget": {
+            "kind": "role",
+            "value": "button",
+            "name": "Retry",
+            "frame": "/workspace"
+          },
+          "maxAttempts": 2
+        },
+        {
+          "code": "operator_required",
+          "target": {
+            "kind": "role",
+            "value": "heading",
+            "name": "Operator verification required",
+            "frame": "/workspace"
+          },
+          "text": "Operator verification required",
+          "action": "handoff",
+          "maxAttempts": 1
+        }
+      ]
+    },
+    {
+      "id": "search_member",
+      "action": "click",
+      "target": {
+        "kind": "role",
+        "value": "button",
+        "name": "Search",
+        "frame": "/workspace"
+      },
+      "recoveries": [
+        {
+          "code": "temporary_interruption",
+          "target": {
+            "kind": "role",
+            "value": "heading",
+            "name": "Temporary service interruption",
+            "frame": "/workspace"
+          },
+          "text": "Temporary service interruption",
+          "action": "click",
+          "actionTarget": {
+            "kind": "role",
+            "value": "button",
+            "name": "Retry",
+            "frame": "/workspace"
+          },
+          "maxAttempts": 2
+        },
+        {
+          "code": "operator_required",
+          "target": {
+            "kind": "role",
+            "value": "heading",
+            "name": "Operator verification required",
+            "frame": "/workspace"
+          },
+          "text": "Operator verification required",
+          "action": "handoff",
+          "maxAttempts": 1
+        }
+      ]
+    },
+    {
+      "id": "open_savings",
+      "action": "click",
+      "target": {
+        "kind": "role",
+        "value": "link",
+        "name": "Savings account",
+        "frame": "/workspace"
+      },
+      "recoveries": [
+        {
+          "code": "temporary_interruption",
+          "target": {
+            "kind": "role",
+            "value": "heading",
+            "name": "Temporary service interruption",
+            "frame": "/workspace"
+          },
+          "text": "Temporary service interruption",
+          "action": "click",
+          "actionTarget": {
+            "kind": "role",
+            "value": "button",
+            "name": "Retry",
+            "frame": "/workspace"
+          },
+          "maxAttempts": 2
+        },
+        {
+          "code": "operator_required",
+          "target": {
+            "kind": "role",
+            "value": "heading",
+            "name": "Operator verification required",
+            "frame": "/workspace"
+          },
+          "text": "Operator verification required",
+          "action": "handoff",
+          "maxAttempts": 1
+        }
+      ]
+    },
+    {
+      "id": "read_balance",
+      "action": "read",
+      "target": {
+        "kind": "role",
+        "value": "status",
+        "name": "Account balance",
+        "frame": "/workspace"
+      },
+      "output": "savings_balance",
+      "recoveries": [
+        {
+          "code": "temporary_interruption",
+          "target": {
+            "kind": "role",
+            "value": "heading",
+            "name": "Temporary service interruption",
+            "frame": "/workspace"
+          },
+          "text": "Temporary service interruption",
+          "action": "click",
+          "actionTarget": {
+            "kind": "role",
+            "value": "button",
+            "name": "Retry",
+            "frame": "/workspace"
+          },
+          "maxAttempts": 2
+        },
+        {
+          "code": "operator_required",
+          "target": {
+            "kind": "role",
+            "value": "heading",
+            "name": "Operator verification required",
+            "frame": "/workspace"
+          },
+          "text": "Operator verification required",
+          "action": "handoff",
+          "maxAttempts": 1
+        }
+      ]
+    }
+  ],
+  "checkpoint": {
+    "target": {
+      "kind": "role",
+      "value": "heading",
+      "name": "Savings balance",
+      "frame": "/workspace"
+    },
+    "text": "Savings balance"
+  },
+  "outcomes": [
+    {
+      "code": "member_not_found",
+      "target": {
+        "kind": "role",
+        "value": "heading",
+        "name": "Member not found",
+        "frame": "/workspace"
+      },
+      "text": "Member not found"
+    }
+  ]
+}
