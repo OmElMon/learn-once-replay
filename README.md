@@ -1,27 +1,56 @@
-# learn-once-replay
+# Learn Once, Replay
 
-This project lets an AI learn a task in a browser, save the steps, and run them again without calling the model.
+**Discover a browser workflow with an LLM. Save a typed capability. Replay it without model calls.**
 
-I used a small banking demo: find a member, open their savings account, and return the balance. The demo has fake data, server-rendered forms, tables, and an iframe. It also has a few things that can go wrong, including a missing member, a temporary service error, and a session that needs an operator to step in.
+Learn Once, Replay is a TypeScript prototype for reusable UI automation. Its synthetic banking demo finds a member, opens a savings account inside an iframe, and returns the displayed balance. Discovery uses local Ollama by default; execution uses Playwright and a strict Zod contract.
 
-Discovery runs locally with Ollama and Qwen2.5 3B. You do not need an API key or a paid service. The repository includes a real discovery run, the capability it generated, and replays of that same capability with different inputs.
+The engineering focus is the boundary between model decisions and execution: parameterized inputs, validated actions, declared outputs, bounded recovery, business outcomes, and human takeover of the same browser session.
 
-## Start here
+**Status:** demonstrable prototype for one read-only web workflow. Arbitrary workflow reliability, desktop automation, production banking integrations and tenant catalogs are not implemented.
 
-You need Node.js 22 or newer. Install the dependencies and browser:
+## Architecture
 
-```sh
-npm ci
-npx playwright install chromium
+```mermaid
+flowchart LR
+  UI[Synthetic banking UI] --> Observe[BrowserSurface observation]
+  Observe --> Model[Ollama discovery]
+  Model --> Validate[Schema and policy checks]
+  Validate --> Execute[BrowserSurface actions]
+  Execute --> Capability[Validated capability JSON]
+  Capability --> Replay[Replay engine]
+  Replay --> Execute
+  Replay --> Result[Outputs and explicit outcomes]
+  Execute --> Human[Same-session human handoff]
+  Human --> Replay
 ```
 
-Start the demo and leave it running:
+Discovery selects named controls from a compact accessibility snapshot and records successful actions. A capability is saved only after an output has been captured and the model's proposed checkpoint matches the live page. Replay validates the artifact and inputs, executes the declared steps, and verifies the final checkpoint. **The replay path never calls a model.**
+
+| Module | Responsibility |
+|---|---|
+| [`src/discovery.ts`](src/discovery.ts) | Structured model decisions, bounded requests and capability recording |
+| [`src/schema.ts`](src/schema.ts) | Strict capability, locator, action, input/output and recovery contracts |
+| [`src/replay.ts`](src/replay.ts) | Ordered execution, business outcomes, recovery and final verification |
+| [`src/surface.ts`](src/surface.ts) | Browser interaction, observation, evidence and session ownership |
+| [`src/policy.ts`](src/policy.ts) | Allowed destinations/actions and demonstration redaction |
+| [`src/demo.ts`](src/demo.ts) | Local synthetic target with reproducible exceptional states |
+| [`src/cli.ts`](src/cli.ts) | Demo, discovery and replay commands |
+
+See [`REPORT.md`](REPORT.md) for the full design and trade-offs.
+
+## Run the saved capability
+
+Requirements: Node.js 22 or newer, npm, and Playwright Chromium. Ollama is needed only to discover a new capability.
 
 ```sh
+git clone https://github.com/OmElMon/learn-once-replay.git
+cd learn-once-replay
+npm ci
+npx playwright install chromium
 npm run demo
 ```
 
-In another terminal, try the saved capability:
+Leave the demo running. In another terminal:
 
 ```sh
 npm run replay -- \
@@ -30,11 +59,11 @@ npm run replay -- \
   --out runs/replay
 ```
 
-The result should contain `savings_balance_amount: "$8,420.50"`. This uses the browser, but no model. You do not need Ollama for replay.
+The result should return `status: "success"` and `savings_balance_amount: "$8,420.50"`. This is fake demo data. Replay needs no API key, model download or paid service.
 
-## Record a new capability
+## Discover a new capability locally
 
-Install and start [Ollama](https://ollama.com), then download the model once. The download is about 1.9 GB.
+Install and start [Ollama](https://ollama.com), then download the default model:
 
 ```sh
 ollama pull qwen2.5:3b
@@ -55,43 +84,40 @@ npm run replay -- \
   --out runs/new-replay
 ```
 
-The model sees a compact accessibility snapshot and chooses an action against a named control. The executor checks that action before running it. Once the requested output has been read, the model chooses a success checkpoint, which the executor verifies against the live page.
+The capability contains declared inputs/outputs, input placeholders, locators, recovery rules and a checkpoint. It contains no executable scripts, model conversation or captured balance. Locators use accessible roles, labels or exact text, with an optional logical frame identity.
 
-Only successful runs produce a capability. The saved JSON contains input placeholders, output names, locators, recovery rules, and the checkpoint. It does not contain the model conversation or the member's balance.
+The local discovery path handles one output per run. It permits at most 10 model calls, with up to 1,000 output tokens and a 120-second timeout per call. `--max-steps` can lower that call budget. `OLLAMA_MODEL` selects another installed model.
 
-The local discovery path handles one output per run. It allows at most 10 model calls, with up to 1,000 output tokens and a 120-second timeout per call. `--max-steps` can lower the call limit. Set `OLLAMA_MODEL` to try another installed model. For this submission, the successful run took six calls and produced four steps.
+## Outcomes, recovery and takeover
 
-## Try the failure cases
+| Result | Meaning |
+|---|---|
+| `success` | Declared outputs were read and the checkpoint matched |
+| `business_outcome` | Valid domain outcome such as a missing member, or invalid input |
+| `failed` | Permission denial, exhausted recovery, missing output or execution/checkpoint failure |
+| `intervention_required` | Human takeover was aborted or expired |
 
-These commands use the saved model-generated capability:
+The CLI exits nonzero for `failed` and unresolved `intervention_required` results. Known transient errors have bounded recovery; unexpected state does not trigger speculative alternative clicks.
 
 ```sh
-# A missing member is a normal business outcome.
+# Missing member: business outcome.
 npm run replay -- --artifact evidence/discovery/capability.json \
   --inputs '{"member_id":"99999"}' --out runs/not-found
 
-# A known service interruption gets a bounded retry.
+# Known interruption: declared Retry recovery.
 npm run replay -- --artifact evidence/discovery/capability.json \
   --url 'http://127.0.0.1:3100/?scenario=transient' --out runs/transient
 
-# Permission denial stops the run and records diagnostic state.
+# Permission denial: hard failure with diagnostic state.
 npm run replay -- --artifact evidence/discovery/capability.json \
   --url 'http://127.0.0.1:3100/?scenario=denied' --out runs/denied
-```
 
-Results distinguish `success`, `business_outcome`, `failed`, and `intervention_required`. Failures include the step and observed state. The CLI exits nonzero for failures and unresolved interventions.
-
-## Take over a session
-
-```sh
+# Same-session human takeover.
 npm run replay -- --artifact evidence/discovery/capability.json \
-  --url 'http://127.0.0.1:3100/?scenario=handoff' \
-  --out runs/handoff --headed
+  --url 'http://127.0.0.1:3100/?scenario=handoff' --out runs/handoff --headed
 ```
 
-Wait for the yellow banner. Click **Verify session** inside the banking page, then **Resume automation** in the banner. You have two minutes. You can also choose **Abort run**.
-
-This is the same browser session the automation was using. Automation pauses while the operator owns it, and manual clicks and changes are recorded without field values. After resume, the executor continues from the pending step. A headless run cannot accept manual input and returns an unresolved intervention for this case.
+For takeover, wait for the yellow banner. Click **Verify session** inside the banking page, then **Resume automation** in the banner within two minutes. **Abort run** is also available. Automation pauses while the operator owns the session, records manual click/change events without field values, and resumes from the pending step. Headless runs cannot accept manual input and return an unresolved intervention for this scenario.
 
 ## Tests and evidence
 
@@ -100,31 +126,28 @@ npm run check
 npm test
 ```
 
-Tests use local browsers and scripted model responses. They make no paid API calls. To check the genuinely discovered artifact across all five scenarios, leave the demo running and run:
+The tests cover strict schema rejection, destination/action policy, redaction, parameter reuse, business outcomes, recovery, ownership transfer, checkpoints, scripted discovery integration and invalid provider responses. They use local browsers and scripted model responses, with no paid API calls.
+
+To verify the saved model-generated artifact across five scenarios, leave the demo running:
 
 ```sh
 node --import tsx tests/verify-generated.ts
 ```
 
-`npm run evidence` is a separate offline demonstration. It starts its own server and uses a hand-authored fixture. Those files are clearly labelled and are not presented as AI discovery.
+[`evidence/README.md`](evidence/README.md) distinguishes three evidence sources:
 
-See [evidence/README.md](evidence/README.md) for the saved runs and their origins. Earlier failed discovery attempts are included too. Getting a small model to select the right controls and stop after reading the output took refinement. One successful discovery is not a claim that arbitrary workflows are reliable.
+- **Genuine local discovery:** a saved Qwen2.5 3B run used six model calls to generate four steps. Repository-provided verification binds subsequent replay scenarios to that artifact by SHA-256.
+- **Offline demonstration:** `npm run evidence` starts its own server and uses a clearly labeled hand-authored fixture. Scripted tests and simulated operators verify integration, rather than discovery reliability or human participation.
+- **Development history:** nine unsuccessful discovery attempts are preserved; a separate real-person headed handoff is documented. One saved success does not establish a repeatable discovery success rate.
 
-## Design and limitations
+Repeated commands in the same output directory append to `events.jsonl`; use fresh directories when comparing runs.
 
-[REPORT.md](REPORT.md) explains the architecture and trade-offs. The main pieces are:
+## Limits and data handling
 
-- `discovery.ts`: model decisions and capability recording.
-- `schema.ts`: the typed capability contract.
-- `replay.ts`: execution, outcomes, and recovery.
-- `surface.ts`: browser interaction, evidence, and session handoff.
-- `policy.ts`: permitted routes/actions and redaction.
-- `demo.ts`: the synthetic banking application.
+This implementation intentionally uses synthetic data. Policy restricts destinations and actions; logs redact supplied inputs, selected credential patterns, known synthetic names and amounts. Failures capture redacted accessibility state. These controls are tailored to the demo and are not comprehensive production authorization or privacy controls.
 
-The policy checks destinations and actions. Logs redact supplied inputs, known synthetic names, secrets, and selected patterns. Failures include a redacted accessibility snapshot. These controls are enough to demonstrate the design on fake data; they are not a complete authorization or privacy system for real banking applications. Declared outputs are returned to the caller, so avoid redirecting sensitive output into logs.
+Declared outputs are returned to the caller. Avoid redirecting sensitive output into logs. Desktop execution, tenant catalogs, capability signing, distributed scheduling, production DLP and authenticated co-browsing remain design proposals, not implemented features. Deterministic replay means fixed actions and bounded policy branches, not identical timing or unchanged external data.
 
-Desktop support and reuse across institutions are design proposals in the report. They are not implemented features.
+## Optional hosted discovery
 
-## Optional OpenAI adapter
-
-The default path stays local. To use the optional hosted adapter, explicitly set `LLM_PROVIDER=openai`, `OPENAI_API_KEY`, and `OPENAI_MODEL` in your shell. That path uses separately billed API access and a 45-second request timeout. The program does not load `.env` files. Never commit a key.
+The default provider is local Ollama. The optional OpenAI adapter requires explicitly setting `LLM_PROVIDER=openai`, `OPENAI_API_KEY` and `OPENAI_MODEL` in the shell. It uses separately billed API access and a 45-second request timeout. The application does not load `.env` files. Never commit credentials.
